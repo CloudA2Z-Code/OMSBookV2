@@ -1,0 +1,127 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "automationAccountName": {
+      "type": "string",
+      "defaultValue": "OMSBook",
+      "metadata": {
+        "description": "The name of existing Automation account."
+      }
+    },
+    "automationAccountLocation": {
+      "type": "string",
+      "defaultValue": "West Europe",
+      "allowedValues": [
+        "Japan East",
+        "East US 2",
+        "West Europe",
+        "Southeast Asia",
+        "South Central US"
+      ],
+      "metadata": {
+        "description": "The region of existing Automation account."
+      }
+    },
+    "dscConfigurationUriWindows": {
+      "type": "string",
+      "metadata": {
+        "description": "The Uri to the DSC configuration that will be deployed to the Windows Node. The URL must not contain spaces."
+      }
+    },
+    "dscConfigurationUriLinux": {
+      "type": "string",
+      "metadata": {
+        "description": "The Uri to the DSC configuration that will be deployed to the Linux node. The URL must not contain spaces."
+      }
+    },
+    "jobId1":{
+        "type": "string",
+        "metadata": {
+            "description": "GUID for Job compilation ID. Use New-Guid cmdlet to generate one."
+        }
+    },
+    "jobId2":{
+        "type": "string",
+        "metadata": {
+            "description": "GUID for Job compilation ID. Use New-Guid cmdlet to generate one."
+        }
+    }
+  },
+  "variables": {
+      "dscConfigurationNameWindows": "SetTimeZone",
+      "dscConfigurationNameLinux": "SetFileConfiguraiton"
+  },
+  "resources": [
+    {
+      "name": "[concat(parameters('automationAccountName'), '/', variables('dscConfigurationNameWindows'))]",
+      "type": "Microsoft.Automation/automationAccounts/configurations",
+      "apiVersion": "2015-01-01-preview",
+      "location": "[parameters('automationAccountLocation')]",
+      "dependsOn": [
+      ],
+      "tags": { },
+      "properties": {
+        "logVerbose": "false",
+        "description": "Set Time Zone",
+        "state": "Published",
+        "overwrite": true,
+        "Source": {
+          "type": "uri",
+          "value": "[parameters('dscConfigurationUriWindows')]"
+        }
+      }
+    },
+    {
+      "name": "[concat(parameters('automationAccountName'), '/', parameters('jobId1'))]",
+      "type": "Microsoft.Automation/automationAccounts/Compilationjobs",
+      "apiVersion": "2015-01-01-preview",
+      "location": "[parameters('automationAccountLocation')]",
+      "dependsOn": [
+           "[concat('Microsoft.Automation/automationAccounts/', parameters('automationAccountName'),'/Configurations/', variables('dscConfigurationNameWindows'))]"
+      ],
+      "tags": { },
+      "properties": {
+        "configuration": {
+            "name": "[variables('dscConfigurationNameWindows')]"
+        }
+      }
+    },
+    {
+      "name": "[concat(parameters('automationAccountName'), '/', variables('dscConfigurationNameLinux'))]",
+      "type": "Microsoft.Automation/automationAccounts/configurations",
+      "apiVersion": "2015-01-01-preview",
+      "location": "[parameters('automationAccountLocation')]",
+      "dependsOn": [
+      ],
+      "tags": { },
+      "properties": {
+        "logVerbose": "false",
+        "description": "Set Time Zone",
+        "state": "Published",
+        "overwrite": true,
+        "Source": {
+          "type": "uri",
+          "value": "[parameters('dscConfigurationUriLinux')]"
+        }
+      }
+    },
+    {
+      "name": "[concat(parameters('automationAccountName'), '/', parameters('jobId2'))]",
+      "type": "Microsoft.Automation/automationAccounts/Compilationjobs",
+      "apiVersion": "2015-01-01-preview",
+      "location": "[parameters('automationAccountLocation')]",
+      "dependsOn": [
+           "[concat('Microsoft.Automation/automationAccounts/', parameters('automationAccountName'),'/Configurations/', variables('dscConfigurationNameLinux'))]"
+      ],
+      "tags": { },
+      "properties": {
+        "configuration": {
+            "name": "[variables('dscConfigurationNameLinux')]"
+        }
+      }
+    }
+  ],
+  "outputs": {
+  }
+}

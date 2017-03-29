@@ -1,0 +1,6 @@
+# Perform Configuration Check
+sudo /opt/microsoft/dsc/Scripts/PerformRequiredConfigurationChecks.py
+
+# Open ImportConfiguration file
+sudo vim /tmp/ImportantConfiguration
+

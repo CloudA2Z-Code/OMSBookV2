@@ -1,0 +1,45 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "automationAccountName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the Automation account where the PS module/DSC resource will be deployed"
+      }
+    }
+  },
+  "variables": {
+  },
+  "resources": [
+    {
+      "name": "[concat(parameters('automationAccountName'), '/', 'nx')]",
+      "type": "microsoft.automation/automationAccounts/modules",
+      "apiVersion": "2015-01-01-preview",
+      "tags": {},
+      "dependsOn": [
+      ],
+      "properties": {
+        "contentLink": {
+          "uri": "https://devopsgallerystorage.blob.core.windows.net/packages/nx.1.0.0.nupkg"
+        }
+      }
+    },
+    {
+      "name": "[concat(parameters('automationAccountName'), '/', 'xTimeZone')]",
+      "type": "microsoft.automation/automationAccounts/modules",
+      "apiVersion": "2015-01-01-preview",
+      "tags": {},
+      "dependsOn": [
+      ],
+      "properties": {
+        "contentLink": {
+          "uri": "https://devopsgallerystorage.blob.core.windows.net/packages/xtimezone.1.6.0.nupkg"
+        }
+      }
+    }
+  ],
+  "outputs": {
+
+  }
+}
