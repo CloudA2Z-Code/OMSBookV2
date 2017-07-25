@@ -17,7 +17,7 @@ $Azure =
 
 # Select Subscription
 Select-AzureRmSubscription `
-    -SubscriptionId $Azure.SubscriptionId `
+    -SubscriptionId $Azure.Id `
     -TenantId $Azure.TenantId `
     -ErrorAction Stop| Out-Null
 

@@ -1,0 +1,30 @@
+﻿<ManagementPackFragment SchemaVersion="2.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Monitoring>
+    <Rules>
+      <Rule ID="OMSBook.Demo.WinServer2012.LogicalDisk.PercentDiskTime.OMS.PerfHourly.Rule" Enabled="true" Priority="Normal" Remotable="true" DiscardLevel="100" ConfirmDelivery="false" Target="WinServer!Microsoft.Windows.Server.6.2.LogicalDisk">
+        <Category>PerformanceCollection</Category>
+        <DataSources>
+          <DataSource ID="DataSource" TypeID="OMSBook.Demo.LogicalDisk.PercentDiskTime.WMI.Perf.DataSource">
+            <IntervalSeconds>300</IntervalSeconds>
+            <SyncTime />
+            <ComputerName>$Target/Host/Property[Type='Windows!Microsoft.Windows.Computer']/PrincipalName$</ComputerName>
+            <DriveLetter>$Target/Property[Type='Windows!Microsoft.Windows.LogicalDevice']/Name$</DriveLetter>
+            <TimeoutSeconds>60</TimeoutSeconds>
+          </DataSource>
+        </DataSources>
+        <WriteActions>
+          <WriteAction ID="HttpWA" TypeID="IPTypes!Microsoft.SystemCenter.CollectCloudPerformanceData" />
+        </WriteActions>
+      </Rule>
+    </Rules>
+  </Monitoring>
+  <LanguagePacks>
+    <LanguagePack ID="ENU" IsDefault="true">
+      <DisplayStrings>
+        <DisplayString ElementID="OMSBook.Demo.WinServer2012.LogicalDisk.PercentDiskTime.OMS.PerfHourly.Rule">
+          <Name>OMS Book Demo Windows 2012 Logical Disk Percent Disk Time OMS PerfHourly Rule</Name>
+        </DisplayString>
+      </DisplayStrings>
+    </LanguagePack>
+  </LanguagePacks>
+</ManagementPackFragment>

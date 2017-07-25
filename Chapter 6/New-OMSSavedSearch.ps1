@@ -2,7 +2,7 @@
 <#
 ===========================================================
 AUTHOR:  Tao Yang
-SCRIPT:  OMSSavedSearchDemoScript.ps1
+SCRIPT:  New-OMSSavedSearch.PS1
 DATE:    20-01-2017
 Version: 1.0
 Comment: Demo creating OMS saved searhces using PowerShell
@@ -64,7 +64,7 @@ $SavedSearchId = $SavedSearchIdSplit[$SavedSearchIdSplit.count -1]
 $SearchResults = @()
 Foreach ($item in (Get-AzureRmOperationalInsightsSavedSearchResults -ResourceGroupName $resourceGroupName -WorkspaceName $OMSWorkspaceName -SavedSearchId $SavedSearchId).value)
 {
-  $SearchResults += ConvertFrom-Json -InputObject $item
+  $SearchResults += ConvertFrom-Json -InputObject $item.tostring()
 }
 $SearchResults
 #endregion

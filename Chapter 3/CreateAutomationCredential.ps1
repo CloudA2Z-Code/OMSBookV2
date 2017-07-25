@@ -21,27 +21,16 @@ Select-AzureRmSubscription `
     -TenantId $Azure.TenantId `
     -ErrorAction Stop| Out-Null
 
+# Automation Account Name
 
-# Variables
-$ResourceGroupName = 'InsideOMS'
-$AutomationAccountName = 'OMSBook'
-$DSCConfigPath = 'C:\DSCConfig'
-$VM = 'ONPREMVM'
+$AutomationAccountName = "OMSBook"
+$ResouceGroupName = "OMS"
 
-# Create folder if do not exits
-If (!(Test-path -Path $DSCConfigPath))
-{
-    New-Item `
-        -Path C:\ `
-        -ItemType Directory `
-        -Name DSCConfig
-}
+# Create AzureCredentials credential
 
-# Create DSC configuration for connection to
-# Azure Automation DSC
-Get-AzureRmAutomationDscOnboardingMetaconfig `
-    -ResourceGroupName $ResourceGroupName `
+$AureCred = Get-Credential
+New-AzureRmAutomationCredential `
+    -Name AzureCredentials `
     -AutomationAccountName $AutomationAccountName `
-    -ComputerName $VM `
-    -OutputFolder $DSCConfigPath `
-    -Force 
+    -ResourceGroupName $ResouceGroupName `
+    -Value $AureCred

@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ManagementPack SchemaVersion="2.0" ContentReadable="true" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Manifest>
+    <Identity>
+      <ID>OMSBook.Demo</ID>
+      <Version>0.0.0.33</Version>
+    </Identity>
+    <Name>OMS Book Demo</Name>
+    <References>
+      <Reference Alias="IPTypes">
+        <ID>Microsoft.IntelligencePacks.Types</ID>
+        <Version>7.0.10038.0</Version>
+        <PublicKeyToken>07865135a68811f5</PublicKeyToken>
+      </Reference>
+      <Reference Alias="SC">
+        <ID>Microsoft.SystemCenter.Library</ID>
+        <Version>7.0.8432.0</Version>
+        <PublicKeyToken>31bf3856ad364e35</PublicKeyToken>
+      </Reference>
+      <Reference Alias="VMM2012">
+        <ID>Microsoft.SystemCenter.VirtualMachineManager.2012.Discovery</ID>
+        <Version>3.2.7672.0</Version>
+        <PublicKeyToken>31bf3856ad364e35</PublicKeyToken>
+      </Reference>
+      <Reference Alias="Windows">
+        <ID>Microsoft.Windows.Library</ID>
+        <Version>7.5.8501.0</Version>
+        <PublicKeyToken>31bf3856ad364e35</PublicKeyToken>
+      </Reference>
+      <Reference Alias="WinServer">
+        <ID>Microsoft.Windows.Server.Library</ID>
+        <Version>6.0.7230.0</Version>
+        <PublicKeyToken>31bf3856ad364e35</PublicKeyToken>
+      </Reference>
+      <Reference Alias="System">
+        <ID>System.Library</ID>
+        <Version>7.5.8501.0</Version>
+        <PublicKeyToken>31bf3856ad364e35</PublicKeyToken>
+      </Reference>
+      <Reference Alias="Perf">
+        <ID>System.Performance.Library</ID>
+        <Version>7.0.8432.0</Version>
+        <PublicKeyToken>31bf3856ad364e35</PublicKeyToken>
+      </Reference>
+    </References>
+  </Manifest>
+  <TypeDefinitions>
+    <ModuleTypes>
+      <DataSourceModuleType ID="OMSBook.Demo.LogicalDisk.PercentDiskTime.WMI.Perf.DataSource" Accessibility="Internal" Batching="false">
+        <Configuration>
+          <xsd:element minOccurs="1" name="IntervalSeconds" type="xsd:int" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element minOccurs="0" name="SyncTime" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element minOccurs="1" name="ComputerName" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element minOccurs="1" name="DriveLetter" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element minOccurs="1" name="TimeoutSeconds" type="xsd:int" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+        </Configuration>
+        <OverrideableParameters>
+          <OverrideableParameter ID="IntervalSeconds" Selector="$Config/IntervalSeconds$" ParameterType="int" />
+          <OverrideableParameter ID="SyncTime" Selector="$Config/SyncTime$" ParameterType="string" />
+          <OverrideableParameter ID="TimeoutSeconds" Selector="$Config/TimeoutSeconds$" ParameterType="int" />
+        </OverrideableParameters>
+        <ModuleImplementation Isolation="Any">
+          <Composite>
+            <MemberModules>
+              <DataSource ID="Scheduler" TypeID="System!System.SimpleScheduler">
+                <IntervalSeconds>$Config/IntervalSeconds$</IntervalSeconds>
+                <SyncTime>$Config/SyncTime$</SyncTime>
+              </DataSource>
+              <ProbeAction ID="Probe" TypeID="Windows!Microsoft.Windows.PowerShellPropertyBagTriggerOnlyProbe">
+                <ScriptName>LogicalDiskPercentDiskTimeWMIPerfProbe.ps1</ScriptName>
+                <ScriptBody><![CDATA[Param ([string]$ComputerName)
+$oAPI = New-Object -ComObject "MOM.ScriptAPI"
+$ThisScript = "LogicalDiskPercentDiskTimeWMIPerfProbe.ps1"
+$oAPI.LogScriptEvent($ThisScript, 1234, 0, "Getting Logical Disk % Disk Time Perf data via WMI for '$ComputerName'.")
+Foreach ($item in (Get-WmiObject -ComputerName $ComputerName -Query "Select Name, PercentDiskTime from Win32_PerfRawData_PerfDisk_LogicalDisk"))
+{
+	$oBag = $oAPI.CreatePropertyBag()
+	$oBag.AddValue("Instance", $item.Name)
+	$oBag.AddValue("PercentDiskTime", $item.PercentDiskTime)
+	$oBag
+	#$oAPI.AddItem($oBag)
+}
+#$oAPI.ReturnItems()
+
+]]></ScriptBody>
+                <Parameters>
+                  <Parameter>
+                    <Name>ComputerName</Name>
+                    <Value>$Config/ComputerName$</Value>
+                  </Parameter>
+                </Parameters>
+                <TimeoutSeconds>$Config/TimeoutSeconds$</TimeoutSeconds>
+              </ProbeAction>
+              <ConditionDetection ID="FilterDrive" TypeID="System!System.ExpressionFilter">
+                <Expression>
+                  <SimpleExpression>
+                    <ValueExpression>
+                      <XPathQuery Type="String">Property[@Name='Instance']</XPathQuery>
+                    </ValueExpression>
+                    <Operator>Equal</Operator>
+                    <ValueExpression>
+                      <Value Type="String">$Config/DriveLetter$</Value>
+                    </ValueExpression>
+                  </SimpleExpression>
+                </Expression>
+              </ConditionDetection>
+              <ConditionDetection ID="Mapper" TypeID="Perf!System.Performance.DataGenericMapper">
+                <ObjectName>LogicalDisk</ObjectName>
+                <CounterName>% Disk Time</CounterName>
+                <InstanceName>$Data/Property[@Name='Instance']$</InstanceName>
+                <Value>$Data/Property[@Name='PercentDiskTime']$</Value>
+              </ConditionDetection>
+            </MemberModules>
+            <Composition>
+              <Node ID="Mapper">
+                <Node ID="FilterDrive">
+                  <Node ID="Probe">
+                    <Node ID="Scheduler" />
+                  </Node>
+                </Node>
+              </Node>
+            </Composition>
+          </Composite>
+        </ModuleImplementation>
+        <OutputType>Perf!System.Performance.Data</OutputType>
+      </DataSourceModuleType>
+      <DataSourceModuleType ID="OMSBook.Demo.Send.OMS.Heartbeat.Event.DataSource" Accessibility="Internal" Batching="false">
+        <Configuration>
+          <xsd:element minOccurs="1" name="IntervalSeconds" type="xsd:int" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element minOccurs="0" name="SyncTime" type="xsd:string" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+          <xsd:element minOccurs="1" name="TimeoutSeconds" type="xsd:int" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+        </Configuration>
+        <OverrideableParameters>
+          <OverrideableParameter ID="IntervalSeconds" Selector="$Config/IntervalSeconds$" ParameterType="int" />
+          <OverrideableParameter ID="SyncTime" Selector="$Config/SyncTime$" ParameterType="string" />
+          <OverrideableParameter ID="TimeoutSeconds" Selector="$Config/TimeoutSeconds$" ParameterType="int" />
+        </OverrideableParameters>
+        <ModuleImplementation Isolation="Any">
+          <Composite>
+            <MemberModules>
+              <DataSource ID="Scheduler" TypeID="System!System.SimpleScheduler">
+                <IntervalSeconds>$Config/IntervalSeconds$</IntervalSeconds>
+                <SyncTime>$Config/SyncTime$</SyncTime>
+              </DataSource>
+              <ProbeAction ID="Probe" TypeID="Windows!Microsoft.Windows.PowerShellPropertyBagTriggerOnlyProbe">
+                <ScriptName>Generate-HeartbeatMessageProbe.ps1</ScriptName>
+                <ScriptBody><![CDATA[$Now = Get-Date
+$UTCNow = $Now.ToUniversalTime()
+$strNow = Get-Date $Now -Format F
+$strUTCNow = Get-Date $UTCNow -Format F
+$ComputerName = $env:COMPUTERNAME
+$Domain = (Get-WmiObject -Query "Select Domain from Win32_ComputerSystem").Domain
+$FQDN = "$ComputerName`.$Domain"
+$oApi = New-Object -Comobject "MOM.ScriptAPI"
+
+$HeartbeatMessage = "OpsMgr Heartbeat Event. Originating Computer: '$FQDN'. Local Time: '$strNow'. UTC Time: '$strUTCNow'."
+
+#Submit property bag
+$oBag = $oAPI.CreatePropertyBag()
+$oBag.AddValue("LogTime", $strNow)
+$oBag.AddValue("LogUTCTime", $strUTCNow)
+$oBag.AddValue("LoggingComputer", $ComputerName)
+$oBag.AddValue("HeartbeatMessage", $HeartbeatMessage)
+$oBag
+]]></ScriptBody>
+                <TimeoutSeconds>$Config/TimeoutSeconds$</TimeoutSeconds>
+              </ProbeAction>
+            </MemberModules>
+            <Composition>
+              <Node ID="Probe">
+                <Node ID="Scheduler" />
+              </Node>
+            </Composition>
+          </Composite>
+        </ModuleImplementation>
+        <OutputType>System!System.PropertyBagData</OutputType>
+      </DataSourceModuleType>
+    </ModuleTypes>
+  </TypeDefinitions>
+  <Monitoring>
+    <Rules>
+      <Rule ID="OMSBook.Demo.SCOM.Management.Server.OMS.Heartbeat.Event.Rule" ConfirmDelivery="false" DiscardLevel="100" Remotable="false" Target="SC!Microsoft.SystemCenter.ManagementServer" Enabled="true" Priority="Normal">
+        <Category>Operations</Category>
+        <DataSources>
+          <DataSource ID="DS" TypeID="OMSBook.Demo.Send.OMS.Heartbeat.Event.DataSource">
+            <IntervalSeconds>180</IntervalSeconds>
+            <SyncTime />
+            <TimeoutSeconds>60</TimeoutSeconds>
+          </DataSource>
+        </DataSources>
+        <ConditionDetection ID="MapToEvent" TypeID="System!System.Event.GenericDataMapper">
+          <EventOriginId>$MPElement$</EventOriginId>
+          <PublisherId>$MPElement$</PublisherId>
+          <PublisherName>SCOMHeartbeat</PublisherName>
+          <Channel>Operations Manager</Channel>
+          <LoggingComputer>$Data/Property[@Name='LoggingComputer']$</LoggingComputer>
+          <EventNumber>123</EventNumber>
+          <EventCategory>1</EventCategory>
+          <EventLevel>4</EventLevel>
+          <UserName />
+          <Description>$Data/Property[@Name='HeartbeatMessage']$</Description>
+          <Params>
+            <Param>$Data/Property[@Name='LogTime']$</Param>
+            <Param>$Data/Property[@Name='LogUTCTime']$</Param>
+          </Params>
+        </ConditionDetection>
+        <WriteActions>
+          <WriteAction ID="HTTPWA" TypeID="IPTypes!Microsoft.SystemCenter.CollectCloudGenericEvent" />
+        </WriteActions>
+      </Rule>
+      <Rule ID="OMSBook.Demo.Windows.Computer.Processor.Percentage.Privileged.Time.Perf.Rule" Enabled="true" Target="Windows!Microsoft.Windows.Computer" ConfirmDelivery="false" DiscardLevel="100" Priority="Normal" Remotable="true">
+        <Category>PerformanceCollection</Category>
+        <DataSources>
+          <DataSource ID="DS" TypeID="IPTypes!Microsoft.IntelligencePacks.Performance.DataProvider">
+            <ComputerName>$Target/Property[Type="Windows!Microsoft.Windows.Computer"]/NetworkName$</ComputerName>
+            <CounterName>% Privileged Time</CounterName>
+            <ObjectName>Processor</ObjectName>
+            <InstanceName>_Total</InstanceName>
+            <AllInstances>false</AllInstances>
+            <IntervalSeconds>10</IntervalSeconds>
+          </DataSource>
+        </DataSources>
+        <WriteActions>
+          <WriteAction ID="WriteToCloud" TypeID="IPTypes!Microsoft.SystemCenter.CollectCloudPerformanceData_PerfIP" />
+        </WriteActions>
+      </Rule>
+      <Rule ID="OMSBook.Demo.VMM.Server.Event1002.Collection.Rule" Remotable="false" Enabled="true" Priority="Normal" Target="VMM2012!Microsoft.SystemCenter.VirtualMachineManager.2012.VMMManagementServer" ConfirmDelivery="false" DiscardLevel="100">
+        <Category>EventCollection</Category>
+        <DataSources>
+          <DataSource ID="DS" TypeID="Windows!Microsoft.Windows.EventProvider">
+            <ComputerName>$Target/Host/Property[Type="Windows!Microsoft.Windows.Computer"]/NetworkName$</ComputerName>
+            <LogName>Microsoft-VirtualMachineManager-Server/Admin</LogName>
+            <Expression>
+              <And>
+                <Expression>
+                  <SimpleExpression>
+                    <ValueExpression>
+                      <XPathQuery Type="UnsignedInteger">EventDisplayNumber</XPathQuery>
+                    </ValueExpression>
+                    <Operator>Equal</Operator>
+                    <ValueExpression>
+                      <Value Type="UnsignedInteger">1002</Value>
+                    </ValueExpression>
+                  </SimpleExpression>
+                </Expression>
+                <Expression>
+                  <SimpleExpression>
+                    <ValueExpression>
+                      <XPathQuery Type="String">PublisherName</XPathQuery>
+                    </ValueExpression>
+                    <Operator>Equal</Operator>
+                    <ValueExpression>
+                      <Value Type="String">Microsoft-VirtualMachineManager-Server</Value>
+                    </ValueExpression>
+                  </SimpleExpression>
+                </Expression>
+              </And>
+            </Expression>
+          </DataSource>
+        </DataSources>
+        <WriteActions>
+          <WriteAction ID="HTTPWA" TypeID="IPTypes!Microsoft.SystemCenter.CollectCloudGenericEvent" />
+        </WriteActions>
+      </Rule>
+      <Rule ID="OMSBook.Demo.WinServer2012.LogicalDisk.PercentDiskTime.OMS.PerfHourly.Rule" Enabled="true" Priority="Normal" Remotable="true" DiscardLevel="100" ConfirmDelivery="false" Target="WinServer!Microsoft.Windows.Server.6.2.LogicalDisk">
+        <Category>PerformanceCollection</Category>
+        <DataSources>
+          <DataSource ID="DataSource" TypeID="OMSBook.Demo.LogicalDisk.PercentDiskTime.WMI.Perf.DataSource">
+            <IntervalSeconds>300</IntervalSeconds>
+            <SyncTime />
+            <ComputerName>$Target/Host/Property[Type='Windows!Microsoft.Windows.Computer']/PrincipalName$</ComputerName>
+            <DriveLetter>$Target/Property[Type='Windows!Microsoft.Windows.LogicalDevice']/Name$</DriveLetter>
+            <TimeoutSeconds>60</TimeoutSeconds>
+          </DataSource>
+        </DataSources>
+        <WriteActions>
+          <WriteAction ID="HttpWA" TypeID="IPTypes!Microsoft.SystemCenter.CollectCloudPerformanceData" />
+        </WriteActions>
+      </Rule>
+    </Rules>
+  </Monitoring>
+  <LanguagePacks>
+    <LanguagePack ID="ENU" IsDefault="true">
+      <DisplayStrings>
+        <DisplayString ElementID="OMSBook.Demo">
+          <Name>OMS Book Demo Management Pack</Name>
+          <Description>This is the demo management pack created in Chapter 17 of the Inside OMS v2 book.</Description>
+        </DisplayString>
+        <DisplayString ElementID="OMSBook.Demo.LogicalDisk.PercentDiskTime.WMI.Perf.DataSource">
+          <Name>OMS LogicalDisk Percent Disk Time WMI Perf Data Source</Name>
+        </DisplayString>
+        <DisplayString ElementID="OMSBook.Demo.LogicalDisk.PercentDiskTime.WMI.Perf.DataSource" SubElementID="IntervalSeconds">
+          <Name>Interval Seconds</Name>
+        </DisplayString>
+        <DisplayString ElementID="OMSBook.Demo.LogicalDisk.PercentDiskTime.WMI.Perf.DataSource" SubElementID="SyncTime">
+          <Name>Sync Time</Name>
+        </DisplayString>
+        <DisplayString ElementID="OMSBook.Demo.LogicalDisk.PercentDiskTime.WMI.Perf.DataSource" SubElementID="TimeoutSeconds">
+          <Name>Script Timeout Seconds</Name>
+        </DisplayString>
+        <DisplayString ElementID="OMSBook.Demo.Send.OMS.Heartbeat.Event.DataSource">
+          <Name>OMS Heartbeat Event Data Source</Name>
+        </DisplayString>
+        <DisplayString ElementID="OMSBook.Demo.Send.OMS.Heartbeat.Event.DataSource" SubElementID="IntervalSeconds">
+          <Name>Interval Seconds</Name>
+        </DisplayString>
+        <DisplayString ElementID="OMSBook.Demo.Send.OMS.Heartbeat.Event.DataSource" SubElementID="SyncTime">
+          <Name>Sync Time</Name>
+        </DisplayString>
+        <DisplayString ElementID="OMSBook.Demo.Send.OMS.Heartbeat.Event.DataSource" SubElementID="TimeoutSeconds">
+          <Name>Script Timeout Seconds</Name>
+        </DisplayString>
+        <DisplayString ElementID="OMSBook.Demo.SCOM.Management.Server.OMS.Heartbeat.Event.Rule">
+          <Name>OMS Book Demo SCOM Management Server OMS Heartbeat Event Rule</Name>
+        </DisplayString>
+        <DisplayString ElementID="OMSBook.Demo.Windows.Computer.Processor.Percentage.Privileged.Time.Perf.Rule">
+          <Name>OMS Book Demo - Processor % Privileged Time NRT Performance Rule</Name>
+        </DisplayString>
+        <DisplayString ElementID="OMSBook.Demo.VMM.Server.Event1002.Collection.Rule">
+          <Name>OMS Book Demo Collect VMM Server 1002 Event to OMS Rule</Name>
+          <Description>This rule collects Event ID 1002 from VMM Server Admin log and store the events in OMS. You can view the events using search queries such as 'Type=Event EventID=1002'</Description>
+        </DisplayString>
+        <DisplayString ElementID="OMSBook.Demo.WinServer2012.LogicalDisk.PercentDiskTime.OMS.PerfHourly.Rule">
+          <Name>OMS Book Demo Windows 2012 Logical Disk Percent Disk Time OMS PerfHourly Rule</Name>
+        </DisplayString>
+      </DisplayStrings>
+      <KnowledgeArticles></KnowledgeArticles>
+    </LanguagePack>
+  </LanguagePacks>
+</ManagementPack>

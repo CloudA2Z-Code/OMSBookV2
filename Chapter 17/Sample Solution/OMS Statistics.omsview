@@ -1,0 +1,229 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "type": "string",
+            "defaultValue": ""
+        },
+        "resourcegroup": {
+            "type": "string",
+            "defaultValue": ""
+        },
+        "subscriptionId": {
+            "type": "string",
+            "defaultValue": ""
+        },
+        "workspace": {
+            "type": "string",
+            "defaultValue": ""
+        },
+        "workspaceapiversion": {
+            "type": "string",
+            "defaultValue": ""
+        }
+    },
+    "resources": [
+        {
+            "apiVersion": "[parameters('workspaceapiversion')]",
+            "name": "[parameters('workspace')]",
+            "type": "Microsoft.OperationalInsights/workspaces",
+            "location": "[parameters('location')]",
+            "id": "[Concat('/subscriptions/', parameters('subscriptionId'), '/resourceGroups/', parameters('resourcegroup'), '/providers/Microsoft.OperationalInsights/workspaces/', parameters('workspace'))]",
+            "resources": [
+                {
+                    "apiVersion": "2015-11-01-preview",
+                    "name": "OMS Statistics",
+                    "type": "views",
+                    "location": "[parameters('location')]",
+                    "id": "[Concat('/subscriptions/', parameters('subscriptionId'), '/resourceGroups/', parameters('resourcegroup'), '/providers/Microsoft.OperationalInsights/workspaces/', parameters('workspace'),'/views/OMS Statistics')]",
+                    "dependson": [
+                        "[Concat('/subscriptions/', parameters('subscriptionId'), '/resourceGroups/', parameters('resourcegroup'), '/providers/Microsoft.OperationalInsights/workspaces/', parameters('workspace'))]"
+                    ],
+                    "properties": {
+                        "Id": "OMS Statistics",
+                        "Name": "OMS Statistics",
+                        "Author": "tao.yang@outlook.com",
+                        "Source": "Local",
+                        "Version": 1,
+                        "Dashboard": [
+                            {
+                                "Id": "SingleQueryDonutBuilderBladeV1",
+                                "Type": "Blade",
+                                "Version": 0,
+                                "Configuration": {
+                                    "General": {
+                                        "title": "OMS Agent",
+                                        "newGroup": false
+                                    },
+                                    "Header": {
+                                        "Title": "Agent",
+                                        "Subtitle": ""
+                                    },
+                                    "Donut": {
+                                        "Query": "Type=Heartbeat | measure countdistinct(Computer) by Version",
+                                        "CenterLegend": {
+                                            "Text": "Count",
+                                            "Operation": "Sum",
+                                            "ArcsToSelect": []
+                                        },
+                                        "Options": {
+                                            "colors": [
+                                                "#00188f",
+                                                "#0072c6",
+                                                "#00bcf2"
+                                            ],
+                                            "valueColorMapping": []
+                                        }
+                                    },
+                                    "List": {
+                                        "Query": "Type=Heartbeat | measure Count() by Computer",
+                                        "HideGraph": false,
+                                        "enableSparklines": true,
+                                        "ColumnsTitle": {
+                                            "Name": "Computer",
+                                            "Value": "Heartbeat Count"
+                                        },
+                                        "Color": "#0072c6",
+                                        "operation": "Summary",
+                                        "thresholds": {
+                                            "isEnabled": false,
+                                            "values": [
+                                                {
+                                                    "name": "Normal",
+                                                    "threshold": "Default",
+                                                    "color": "#009e49",
+                                                    "isDefault": true
+                                                },
+                                                {
+                                                    "name": "Warning",
+                                                    "threshold": "60",
+                                                    "color": "#fcd116",
+                                                    "isDefault": false
+                                                },
+                                                {
+                                                    "name": "Error",
+                                                    "threshold": "90",
+                                                    "color": "#ba141a",
+                                                    "isDefault": false
+                                                }
+                                            ]
+                                        },
+                                        "NameDSVSeparator": "",
+                                        "NavigationQuery": "Type=Heartbeat {selected item}"
+                                    }
+                                }
+                            },
+                            {
+                                "Id": "NumberTileListBuilderBlade",
+                                "Type": "Blade",
+                                "Version": 0,
+                                "Configuration": {
+                                    "General": {
+                                        "title": "Solutions",
+                                        "newGroup": false,
+                                        "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAADAFBMVEUAc9YAe9YAe94Ae+cAhOcAhO8AhPcAjPcAjP8AlP8AnP8Ie9YIe94IhN4IhOcIjO8IlP8QhN4QjOcQlPcQlP8QnP8YhN4YjN4YjOcYlO8YlPcYnP8hjN4hlO8hnPcpjN4plN4plOcplO8xlN4xlOcxnOcxnO8xpfc5nOdCnOdCnO9CpfdKpedSpedSre9SrfdSrf9apedaredjredjtfdrtedrte9ztedzte9zve9zvfdzxv97ve+Eve+Exu+ExveExv+Ezv+Mxu+MxveUxu+Uzu+Uzveczu+czvelzu+lzvel1vet1ve11ve13ve13v+93ve93v/G3vfG5/fG5//O5/fO5//O7//W5/fW5//W7/fW7//e7//e9//n7//n9//v9//39//3//////8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA6/CSiAAABAHRSTlP///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////8A////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////WqUaqQAAAAlwSFlzAABcRgAAXEYBFJRDQQAAAAd0SU1FB+EEHQkeMLt2f/kAAAAHdEVYdEF1dGhvcgCprsxIAAAADHRFWHREZXNjcmlwdGlvbgATCSEjAAAACnRFWHRDb3B5cmlnaHQArA/MOgAAAA50RVh0Q3JlYXRpb24gdGltZQA19w8JAAAACXRFWHRTb2Z0d2FyZQBdcP86AAAAC3RFWHREaXNjbGFpbWVyALfAtI8AAAAIdEVYdFdhcm5pbmcAwBvmhwAAAAd0RVh0U291cmNlAPX/g+sAAAAIdEVYdENvbW1lbnQA9syWvwAAAAZ0RVh0VGl0bGUAqO7SJwAAAitJREFUOI1tk/+PmjAUwEspO5HIjv3gMsfmXbzkJJkzQpwx0/PCubBO4Xo6skYd397//z+sZRrBrQ0hpJ/36evrA8HFyNZf7mzbmf08fqP6cjG1NKwghFVy+/0/QGxrynEgRRsUl8DWFNHHKQa5y+tAamFFORuQQj7VAYegqkDuElSBDanEYyJtuF0FBhUB7s0HWHhIdAYKQ8aoamkgPlB5IHVyBmJTmA3XM6SCzIGS0nQE9s+ciR0UC+AGY6yoMwmICFsCmbuaND2ZI7Iy6OKe0yYTCKQBvZWAf8/C+2VpMAroki14f7cQETcIijw9ZAKjMgcrh64WgvdqJpNEijpC0Gee7gsgFAZsQN1AlmjTicevA2loiWMaaWITWoy0ab6UOZgcZSnkWQ6FMMgKG+3yQYZhSMEA0J29n3xcB505q1T6VG+LA3p3FQ906jfGm0qlUXlVuBWK2zzsgf/KssOubhCIaq5kw7gDLjMcUlYzYKz147LlOrrwwER32RUh2mmaLefHsWlZlIrXIeJZFAY0oCGl4tmkpztET4sk+BrHj4z7Zcy3J4j83+cuQe/1rdNczpsua1qyK0yd95p+BZhNOXvYxwvGH8ofwV9k68e4AshWeea7l132ss1XtGBRvqVQB/pN6usjpttcf5MojbjbuwDmQxYOA+5ME3eUeZ+5zy+A3b4QlSw7j8NhnwNcAMvrwG+MJGm2EuM2/QeAOF52xrJcH+xkXdTW4Q8qeeTdMjZi5gAAAABJRU5ErkJggg==",
+                                        "useIcon": true
+                                    },
+                                    "Tile": {
+                                        "Legend": "Solutions In Use",
+                                        "Query": "Type=Usage | distinct Solution"
+                                    },
+                                    "List": {
+                                        "Query": "Type=Usage QuantityUnit=\"MBytes\" | measure sum(Quantity) as DataVolume by Solution",
+                                        "HideGraph": false,
+                                        "enableSparklines": false,
+                                        "ColumnsTitle": {
+                                            "Name": "Solution",
+                                            "Value": "Data Consumed (MBytes)"
+                                        },
+                                        "Color": "#0072c6",
+                                        "operation": "Summary",
+                                        "thresholds": {
+                                            "isEnabled": false,
+                                            "values": [
+                                                {
+                                                    "name": "Normal",
+                                                    "threshold": "Default",
+                                                    "color": "#009e49",
+                                                    "isDefault": true
+                                                },
+                                                {
+                                                    "name": "Warning",
+                                                    "threshold": "60",
+                                                    "color": "#fcd116",
+                                                    "isDefault": false
+                                                },
+                                                {
+                                                    "name": "Error",
+                                                    "threshold": "90",
+                                                    "color": "#ba141a",
+                                                    "isDefault": false
+                                                }
+                                            ]
+                                        },
+                                        "NameDSVSeparator": "",
+                                        "NavigationQuery": "{selected item}"
+                                    }
+                                }
+                            },
+                            {
+                                "Id": "NotableQueriesBuilderBlade",
+                                "Type": "Blade",
+                                "Version": 0,
+                                "Configuration": {
+                                    "General": {
+                                        "title": "Useful Queries",
+                                        "newGroup": false,
+                                        "preselectedFilters": "Type, Computer",
+                                        "renderMode": "grid"
+                                    },
+                                    "queries": [
+                                        {
+                                            "query": "Type=Heartbeat | measure count() by Computer",
+                                            "displayName": "Computers sending heartbeat"
+                                        },
+                                        {
+                                            "query": "Type=Usage | distinct Solution",
+                                            "displayName": "Solution Count"
+                                        }
+                                    ]
+                                }
+                            }
+                        ],
+                        "OverviewTile": {
+                            "Id": "SingleQueryDonutBuilderTileV1",
+                            "Type": "OverviewTile",
+                            "Version": 0,
+                            "Configuration": {
+                                "Donut": {
+                                    "Query": "* | measure count() by Type",
+                                    "CenterLegend": {
+                                        "Text": "Log Count",
+                                        "Operation": "Sum",
+                                        "ArcsToSelect": []
+                                    },
+                                    "Options": {
+                                        "colors": [
+                                            "#00188f",
+                                            "#007233",
+                                            "#00bcf2"
+                                        ],
+                                        "valueColorMapping": []
+                                    }
+                                },
+                                "Advanced": {
+                                    "DataFlowVerification": {
+                                        "Enabled": false,
+                                        "Query": "*",
+                                        "Message": ""
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+}

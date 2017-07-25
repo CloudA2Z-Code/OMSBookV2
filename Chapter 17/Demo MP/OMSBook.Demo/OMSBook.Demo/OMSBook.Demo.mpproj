@@ -1,0 +1,128 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <ProjectGuid>{58e5f766-bf0b-44fd-be6d-e52e2ac2aed8}</ProjectGuid>
+    <RootNamespace>OMSBook.Demo</RootNamespace>
+    <Name>OMS Book Demo</Name>
+    <ManagementPackName>OMSBook.Demo</ManagementPackName>
+    <Version>0.0.0.1</Version>
+    <MpFrameworkVersion>v7.0.1</MpFrameworkVersion>
+    <MpFrameworkProfile>OM</MpFrameworkProfile>
+    <ProductVersion>1.1.0.0</ProductVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug\</OutputPath>
+    <GenerateSealed>True</GenerateSealed>
+    <Company>OMS Book</Company>
+    <Copyright>Copyright (c) OMS Book. All rights reserved.</Copyright>
+    <DelaySigning>False</DelaySigning>
+    <AssemblyOriginatorKeyFile>C:\Documents\OMSBook.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>false</DebugSymbols>
+    <OutputPath>bin\Release\</OutputPath>
+    <DelaySigning>false</DelaySigning>
+    <Company>MyCompany</Company>
+    <Copyright>Copyright (c) MyCompany. All rights reserved.</Copyright>
+    <DelaySign>false</DelaySign>
+    <AssemblyOriginatorKeyFile />
+  </PropertyGroup>
+  <ItemGroup>
+    <ManagementPackReference Include="Microsoft.IntelligencePacks.Types">
+      <HintPath>C:\Documents\Microsoft.IntelligencePacks.Types.mp</HintPath>
+      <Alias>IPTypes</Alias>
+      <MinVersion>7.0.10038.0</MinVersion>
+      <PackageToBundle>False</PackageToBundle>
+    </ManagementPackReference>
+    <ManagementPackReference Include="Microsoft.SystemCenter.Library">
+      <Alias>SC</Alias>
+      <PackageToBundle>false</PackageToBundle>
+    </ManagementPackReference>
+    <ManagementPackReference Include="Microsoft.SystemCenter.VirtualMachineManager.2012.Discovery">
+      <HintPath>C:\Documents\MPRef\Microsoft.SystemCenter.VirtualMachineManager.2012.Discovery.mp</HintPath>
+      <Alias>VMM2012</Alias>
+      <MinVersion>3.2.7672.0</MinVersion>
+      <PackageToBundle>False</PackageToBundle>
+    </ManagementPackReference>
+    <ManagementPackReference Include="Microsoft.SystemCenter.VirtualMachineManager.Library">
+      <HintPath>C:\Documents\MPRef\Microsoft.SystemCenter.VirtualMachineManager.Library.mp</HintPath>
+      <Alias>VMMLib</Alias>
+      <MinVersion>3.2.7672.0</MinVersion>
+      <PackageToBundle>False</PackageToBundle>
+    </ManagementPackReference>
+    <ManagementPackReference Include="Microsoft.Windows.Library">
+      <Alias>Windows</Alias>
+      <PackageToBundle>False</PackageToBundle>
+    </ManagementPackReference>
+    <ManagementPackReference Include="Microsoft.Windows.Server.Library">
+      <HintPath>C:\Documents\MPRef\Microsoft.Windows.Server.Library.mp</HintPath>
+      <Alias>WinServer</Alias>
+      <MinVersion>6.0.7230.0</MinVersion>
+      <PackageToBundle>False</PackageToBundle>
+    </ManagementPackReference>
+    <ManagementPackReference Include="System.AdminItem.Library">
+      <HintPath>C:\Program Files (x86)\System Center 2012 Visual Studio Authoring Extensions\References\OM2012\System.AdminItem.Library.mp</HintPath>
+      <Alias>SAL</Alias>
+      <MinVersion>7.5.8501.0</MinVersion>
+      <PackageToBundle>False</PackageToBundle>
+    </ManagementPackReference>
+    <ManagementPackReference Include="System.Health.Library">
+      <Alias>Health</Alias>
+      <PackageToBundle>False</PackageToBundle>
+    </ManagementPackReference>
+    <ManagementPackReference Include="System.Library">
+      <Alias>System</Alias>
+      <PackageToBundle>false</PackageToBundle>
+    </ManagementPackReference>
+    <ManagementPackReference Include="Microsoft.SystemCenter.Visualization.Library">
+      <Alias>Visualization</Alias>
+      <PackageToBundle>False</PackageToBundle>
+    </ManagementPackReference>
+    <ManagementPackReference Include="System.Performance.Library">
+      <HintPath>C:\Program Files (x86)\System Center 2012 Visual Studio Authoring Extensions\References\OM2012SP1\System.Performance.Library.mp</HintPath>
+      <Alias>Perf</Alias>
+      <MinVersion>7.0.8432.0</MinVersion>
+      <PackageToBundle>False</PackageToBundle>
+    </ManagementPackReference>
+    <ManagementPackReference Include="System.Virtualization.Library">
+      <HintPath>C:\Program Files (x86)\System Center 2012 Visual Studio Authoring Extensions\References\OM2012SP1\System.Virtualization.Library.mp</HintPath>
+      <Alias>SVL</Alias>
+      <MinVersion>7.0.8432.0</MinVersion>
+    </ManagementPackReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ManagementPack.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Modules\LogicalDisk.PercentDiskTime.WMI.Perf.DataSource.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Modules\Send.OMS.Heartbeat.Event.DS.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Rules\OMS.Heartbeat.Events.Rule.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Rules\Processor.PercentPrivilegedTime.NRT.Perf.Rule.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Rules\VMM.1002.Event.Collection.Rule.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Rules\WinServer.2012.LogicalDisk.PercentDiskTime.OMS.Perf.Rule.mpx">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Modules" />
+    <Folder Include="Scripts" />
+    <Folder Include="Rules" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Scripts\Generate-HeartbeatMessageProbe.ps1" />
+    <EmbeddedResource Include="Scripts\LogicalDiskPercentDiskTimeWMIPerfProbe.ps1" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\VSAC\Microsoft.SystemCenter.OperationsManager.targets" />
+</Project>

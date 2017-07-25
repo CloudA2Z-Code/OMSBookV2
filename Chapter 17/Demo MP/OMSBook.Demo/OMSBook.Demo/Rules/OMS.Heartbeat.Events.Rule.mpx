@@ -1,0 +1,44 @@
+﻿<ManagementPackFragment SchemaVersion="2.0" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Monitoring>
+    <Rules>
+      <Rule ID="OMSBook.Demo.SCOM.Management.Server.OMS.Heartbeat.Event.Rule" ConfirmDelivery="false" DiscardLevel="100" Remotable="false" Target="SC!Microsoft.SystemCenter.ManagementServer" Enabled="true" Priority="Normal">
+        <Category>Operations</Category>
+        <DataSources>
+          <DataSource ID="DS" TypeID="OMSBook.Demo.Send.OMS.Heartbeat.Event.DataSource">
+            <IntervalSeconds>180</IntervalSeconds>
+            <SyncTime />
+            <TimeoutSeconds>60</TimeoutSeconds>
+          </DataSource>
+        </DataSources>
+        <ConditionDetection ID="MapToEvent" TypeID="System!System.Event.GenericDataMapper">
+          <EventOriginId>$MPElement$</EventOriginId>
+          <PublisherId>$MPElement$</PublisherId>
+          <PublisherName>SCOMHeartbeat</PublisherName>
+          <Channel>Operations Manager</Channel>
+          <LoggingComputer>$Data/Property[@Name='LoggingComputer']$</LoggingComputer>
+          <EventNumber>123</EventNumber>
+          <EventCategory>1</EventCategory>
+          <EventLevel>4</EventLevel>
+          <UserName />
+          <Description>$Data/Property[@Name='HeartbeatMessage']$</Description>
+          <Params>
+            <Param>$Data/Property[@Name='LogTime']$</Param>
+            <Param>$Data/Property[@Name='LogUTCTime']$</Param>
+          </Params>
+        </ConditionDetection>
+        <WriteActions>
+          <WriteAction ID="HTTPWA" TypeID="IPTypes!Microsoft.SystemCenter.CollectCloudGenericEvent" />
+        </WriteActions>
+      </Rule>
+    </Rules>
+  </Monitoring>
+  <LanguagePacks>
+    <LanguagePack ID="ENU" IsDefault="true">
+      <DisplayStrings>
+        <DisplayString ElementID="OMSBook.Demo.SCOM.Management.Server.OMS.Heartbeat.Event.Rule">
+          <Name>OMS Book Demo SCOM Management Server OMS Heartbeat Event Rule</Name>
+        </DisplayString>
+      </DisplayStrings>
+    </LanguagePack> 
+  </LanguagePacks>
+</ManagementPackFragment>
