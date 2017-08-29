@@ -1,0 +1,40 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0",
+    "parameters": {
+        "accountName": {
+            "type": "string",
+            "defaultValue": "OMSBook"
+        },
+        "accountLocation": {
+            "type": "string",
+            "defaultValue": "West Europe",
+            "allowedValues": [
+                "Japan East",
+                "East US 2",
+                "West Europe",
+                "Southeast Asia",
+                "South Central US"
+            ]
+        }
+    },
+    "variables": {
+    },
+    "resources": [
+        {
+            "name": "[parameters('accountName')]",
+            "type": "Microsoft.Automation/automationAccounts",
+            "apiVersion": "2015-01-01-preview",
+			"location":  "[parameters('accountLocation')]",
+            "dependsOn": [],
+            "tags": {},
+            "properties": {
+                "comment": "Resource defined structure",
+                "sku": {
+                    "name": "free"
+                }
+            }
+        }
+    ],
+	"outputs": {}
+}

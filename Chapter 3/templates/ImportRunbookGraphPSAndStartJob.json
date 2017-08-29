@@ -1,0 +1,103 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "automationAccountName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of existing OMS Automation account to deploy to runbook."
+      }
+    },
+    "automationAccountLocation": {
+      "type": "string",
+      "allowedValues": [
+        "Japan East",
+        "East US 2",
+        "West Europe",
+        "Southeast Asia",
+        "South Central US"
+      ],
+      "metadata": {
+        "description": "The region of existing OMS Automation account."
+      }
+    },
+    "runbookUrl": {
+      "type": "string",
+      "metadata": {
+        "description": "The url of the runbook that will be deployed. The runbook can be fetched if uploaded on GitHub repository or Azure storage. The URL should not contain space characters."
+      }
+    },
+    "runbookJobId": {
+      "type": "string",
+      "metadata": {
+          "description": "GUID for runbook job ID. Generate one via New-Guid PowerShell cmdlet."
+      }
+    },
+    "vmName":{
+        "type": "string",
+        "metadata": {
+          "description": "The name of existing VM"
+      }
+    },
+    "vmResourceGroup":{
+        "type": "string",
+        "metadata": {
+          "description": "The resource group name of the VM"
+      }
+    },
+    "vmLocation":{
+        "type": "string",
+        "metadata": {
+          "description": "The Azure region of the VM."
+      }
+    }
+  },
+  "variables": {
+      "runbookParameters": {
+          "VMName": "[parameters('vmName')]",
+          "VMResourceGroup": "[parameters('vmResourceGroup')]",
+          "VMLocation" : "[parameters('vmLocation')]"
+        }
+  },
+
+  "resources": [
+    {
+      "name": "[concat(parameters('automationAccountName'), '/', 'Install-OMSExtensionV2VMGraphicalPS')]",
+      "type": "Microsoft.Automation/automationAccounts/runbooks",
+      "apiVersion": "2015-01-01-preview",
+      "location": "[parameters('automationAccountLocation')]",
+      "tags": {
+      },
+      "properties": {
+        "runbookType": "GraphicalPowerShell",
+        "logProgress": "false",
+        "logVerbose": "false",
+        "description": "Installs OMS extension",
+        "publishContentLink": {
+          "uri": "[parameters('runbookUrl')]",
+          "version": "1.0.0.1"
+        }
+
+      }
+    },
+    {
+      "name": "[concat(parameters('automationAccountName'), '/', parameters('runbookJobId'))]",
+      "type": "Microsoft.Automation/automationAccounts/jobs",
+      "apiVersion": "2015-01-01-preview",
+      "location": "[parameters('automationAccountLocation')]",
+      "dependsOn": [
+          "[resourceId('Microsoft.Automation/automationAccounts/runbooks', parameters('automationAccountName'), 'Install-OMSExtensionV2VMGraphicalPS')]"
+      ],
+      "tags": { },
+      "properties": {
+        "runbook": {
+          "name": "Install-OMSExtensionV2VMGraphicalPS"
+        },
+        "parameters": "[variables('runbookParameters')]"
+      }
+    }
+  ],
+  "outputs": {
+  }
+}
+

@@ -1,0 +1,34 @@
+Configuration MMAagent
+{
+    $OIPackageLocalPath = "C:\MMASetup-AMD64.exe"
+    Import-DscResource -ModuleName xPSDesiredStateConfiguration
+
+    Node MMAagent {
+        #Service state
+        Service OIService
+        {
+            Name = "HealthService"
+            State = "Running"
+        } 
+
+        xRemoteFile OIPackage {
+            Uri = "https://opsinsight.blob.core.windows.net/publicfiles/MMASetup-AMD64.exe"
+            DestinationPath = $OIPackageLocalPath
+        }
+
+        #Application
+        Package OI {
+            Ensure = "Present"
+            Path  = $OIPackageLocalPath
+            Name = "Microsoft Monitoring Agent"
+            ProductId = ""
+            Arguments = '/C:"setup.exe /qn ADD_OPINSIGHTS_WORKSPACE=1 OPINSIGHTS_WORKSPACE_ID=”YOURID” OPINSIGHTS_WORKSPACE_KEY=”YOURKEY"'
+            DependsOn = "[xRemoteFile]OIPackage"
+        }
+
+        #Other configuration such as
+        # - Port open/close
+        # - LOB applications
+
+    }
+}  

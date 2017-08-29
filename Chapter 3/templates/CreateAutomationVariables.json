@@ -1,0 +1,75 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "automationAccountName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the OMS Automation account where the variable will be deployed"
+      }
+    },
+    "omsWorkspaceId": {
+      "type": "string",
+      "metadata": {
+        "description": "OMS Workspace ID."
+      }
+    },
+    "omsWorkspacePrimaryKey": {
+      "type": "securestring",
+      "metadata": {
+        "description": "OMS Workspace Primary Key."
+      }
+    }
+  },
+  "variables": {
+  },
+  "resources": [
+    {
+      "name": "[concat(parameters('automationAccountName'), '/', 'AzureSubscriptionID')]",
+      "type": "microsoft.automation/automationAccounts/variables",
+      "apiVersion": "2015-01-01-preview",
+      "dependsOn": [
+      ],
+      "tags": {
+      },
+      "properties": {
+        "description": "Azure Subscription ID",
+        "isEncrypted": 0,
+        "type": "string",
+        "value": "[concat('\"', subscription().subscriptionId ,'\"')]"
+      }
+    },
+    {
+      "name": "[concat(parameters('automationAccountName'), '/', 'OMSWorkspaceID')]",
+      "type": "microsoft.automation/automationAccounts/variables",
+      "apiVersion": "2015-01-01-preview",
+      "dependsOn": [
+      ],
+      "tags": {
+      },
+      "properties": {
+        "description": "OMS Workspace ID",
+        "isEncrypted": 0,
+        "type": "string",
+        "value": "[concat('\"', parameters('omsWorkspaceId') ,'\"')]"
+      }
+    },
+    {
+      "name": "[concat(parameters('automationAccountName'), '/', 'OMSWorkspacePrimaryKey')]",
+      "type": "microsoft.automation/automationAccounts/variables",
+      "apiVersion": "2015-01-01-preview",
+      "dependsOn": [
+      ],
+      "tags": {
+      },
+      "properties": {
+        "description": "OMS Workspace Primary Key",
+        "isEncrypted": 1,
+        "type": "string",
+        "value": "[concat('\"', parameters('omsWorkspacePrimaryKey') ,'\"')]"
+      }
+    }
+  ],
+  "outputs": {
+  }
+}
